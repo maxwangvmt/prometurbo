@@ -87,7 +87,7 @@ func (d *PrometheusDiscoveryClient) Discover(accountValues []*proto.AccountValue
 			}
 			entities = append(entities, dtos...)
 			if len(dtos) > 0 {
-				fmt.Printf("Discovered DTO: %++v\n", dtos[0])
+				glog.V(4).Infof("Discovered DTO: %++v\n", dtos[0])
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func (d *PrometheusDiscoveryClient) Discover(accountValues []*proto.AccountValue
 	discoveryResponse := &proto.DiscoveryResponse{
 		EntityDTO: entities,
 	}
-	fmt.Printf("Prometheus discovery response %s\n", discoveryResponse)
+	glog.V(3).Infof("Prometheus discovery response %s\n", discoveryResponse)
 
 	return discoveryResponse, nil
 }

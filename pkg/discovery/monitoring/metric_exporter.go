@@ -3,7 +3,6 @@ package monitoring
 import (
 	"net/http"
 	"encoding/json"
-	"fmt"
 	"github.com/golang/glog"
 	"io/ioutil"
 )
@@ -34,16 +33,16 @@ func (m *metricExporter) Query() ([]*EntityMetric, error) {
 		return nil, nil
 	}
 
-	fmt.Printf("mr=%+v, len=%d\n", mr, len(mr.Data))
+	glog.V(4).Infof("mr=%+v, len=%d\n", mr, len(mr.Data))
 	for i, e := range mr.Data {
-		fmt.Printf("[%d] %+v\n", i, e)
+		glog.V(4).Infof("[%d] %+v\n", i, e)
 	}
 
 	return mr.Data, nil
 }
 
 func sendRequest(endpoint string) []byte {
-	glog.V(2).Info("Sending request to %s", endpoint)
+	glog.V(2).Infof("Sending request to %s", endpoint)
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		glog.Errorf("Error: %v", err)
@@ -56,6 +55,6 @@ func sendRequest(endpoint string) []byte {
 		glog.Errorf("Error: %v", err)
 		return nil
 	}
-	glog.V(2).Info("Received resposne: %s", string(body))
+	glog.V(2).Infof("Received resposne: %s", string(body))
 	return body
 }

@@ -19,8 +19,17 @@ import (
 type disconnectFromTurboFunc func()
 
 func main() {
-	fmt.Printf("Starting server...\n")
 	flag.Parse()
+
+	// The default is to log to both of stderr and file
+	// These arguments can be overloaded from the command-line args
+	flag.Set("logtostderr", "false")
+	flag.Set("alsologtostderr", "true")
+	flag.Set("log_dir", "/var/log")
+
+	defer glog.Flush()
+
+	glog.V(0).Infof("Starting prometurbo...",)
 
 	serviceConf := conf.DefaultConfPath
 
@@ -31,12 +40,11 @@ func main() {
 
 	conf, err := conf.NewPrometheusConf(serviceConf)
 	if err != nil {
-		fmt.Printf("Error while parsing the turbo communicator config file %v: %v\n", serviceConf, err)
-		glog.Infof("Error while parsing the turbo communicator config file %v: %v\n", serviceConf, err)
+		glog.Errorf("Error while parsing the turbo communicator config file %v: %v\n", serviceConf, err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("conf: %++v\n", conf)
+	glog.V(2).Infof("conf: %++v\n", conf)
 
 	communicator := conf.Communicator
 	targetAddr := conf.TargetConf.Address //"target-address"
@@ -55,7 +63,7 @@ func main() {
 			DiscoversTarget(targetAddr, discoveryClient)).Create()
 
 	if err != nil {
-		glog.Infof("Error while building turbo tap service on target %v: %v\n", targetAddr, err)
+		glog.Errorf("Error while building turbo tap service on target %v: %v\n", targetAddr, err)
 		os.Exit(1)
 	}
 

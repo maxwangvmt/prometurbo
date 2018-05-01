@@ -5,7 +5,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-go-sdk/pkg/service"
 	"io/ioutil"
-	"os"
 )
 
 const (
@@ -28,7 +27,11 @@ type PrometheusTargetConf struct {
 func NewPrometheusConf(targetConfigFilePath string) (*PrometheusConf, error) {
 
 	glog.Infof("Read configuration from %s\n", targetConfigFilePath)
-	metaConfig := readConfig(targetConfigFilePath)
+	metaConfig, err := readConfig(targetConfigFilePath)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if metaConfig.MetricExporterEndpoint == "" {
 		metaConfig.MetricExporterEndpoint = defaultEndpoint
@@ -38,21 +41,22 @@ func NewPrometheusConf(targetConfigFilePath string) (*PrometheusConf, error) {
 }
 
 // Get the config from file.
-func readConfig(path string) *PrometheusConf {
-	file, e := ioutil.ReadFile(path)
-	if e != nil {
-		glog.Infof("File error: %v\n", e)
-		os.Exit(1)
+func readConfig(path string) (*PrometheusConf, error) {
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		glog.Errorf("File error: %v\n", err)
+		return nil, err
 	}
 	glog.Infoln(string(file))
 
 	var config PrometheusConf
-	err := json.Unmarshal(file, &config)
+	err = json.Unmarshal(file, &config)
 
 	if err != nil {
 		glog.Errorf("Unmarshall error :%v\n", err)
+		return nil, err
 	}
 	glog.Infof("Results: %+v\n", config)
 
-	return &config
+	return &config, nil
 }

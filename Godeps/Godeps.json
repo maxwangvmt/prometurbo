@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/turbonomic/turbo-goprobe-prometheus",
+	"ImportPath": "github.com/turbonomic/prometurbo",
 	"GoVersion": "go1.9",
 	"GodepVersion": "v79",
 	"Packages": [
@@ -12,8 +12,8 @@
 		},
 		{
 			"ImportPath": "github.com/golang/protobuf/proto",
-			"Comment": "v1.0.0-1-gbbd03ef",
-			"Rev": "bbd03ef6da3a115852eaf24c8a1c46aeb39aa175"
+			"Comment": "v1.0.0-2-ge09c5db",
+			"Rev": "e09c5db296004fbe3f74490e84dcd62c3c5ddb1b"
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
@@ -30,43 +30,43 @@
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg/builder",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg/mediationcontainer",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg/probe",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg/proto",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg/service",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg/supplychain",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		},
 		{
 			"ImportPath": "github.com/turbonomic/turbo-go-sdk/pkg/version",
-			"Comment": "v6.0-16-g36a4508",
-			"Rev": "36a45086d337dd115b0bfd737060c395a6fb3411"
+			"Comment": "v6.0-17-g773315d",
+			"Rev": "773315de6e27bf3aabc72e1ccec3c7de2b3db2eb"
 		}
 	]
 }

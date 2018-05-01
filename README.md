@@ -1,4 +1,4 @@
-# turbo-goprobe-prometheus
+# prometurbo
 
 This is a GO SDK probe that aims to discover applications and nodes from [Prometheus](https://prometheus.io/) for the
 Turbonomic Operations Manager.  This probe is of **_prototype_** quality at the moment.

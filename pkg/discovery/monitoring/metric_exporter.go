@@ -1,9 +1,7 @@
 package monitoring
 
 import (
-	//"encoding/json"
 	"net/http"
-	//"fmt"
 	"encoding/json"
 	"fmt"
 	"github.com/golang/glog"

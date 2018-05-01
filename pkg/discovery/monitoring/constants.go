@@ -25,8 +25,8 @@ const (
 	CAPACITY = "capacity"
 
 	//Capacity
-	TPSCap     = 501.0
-	LatencyCap = 101.0 //ms
+	TPSCap     = 20.0
+	LatencyCap = 100.0 //ms
 )
 
 var EntityTypeMap = map[int32]proto.EntityDTO_EntityType{

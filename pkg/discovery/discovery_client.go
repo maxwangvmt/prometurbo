@@ -5,8 +5,8 @@ import (
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"github.com/turbonomic/turbo-goprobe-prometheus/pkg/discovery/monitoring"
-	"github.com/turbonomic/turbo-goprobe-prometheus/pkg/registration"
+	"github.com/turbonomic/prometurbo/pkg/discovery/monitoring"
+	"github.com/turbonomic/prometurbo/pkg/registration"
 )
 
 // Discovery Client for the Prometheus Probe

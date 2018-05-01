@@ -12,7 +12,11 @@ import (
 	"github.com/turbonomic/prometurbo/pkg/registration"
 	"os"
 	"time"
+	"os/signal"
+	"syscall"
 )
+
+type disconnectFromTurboFunc func()
 
 func main() {
 	fmt.Printf("Starting server...\n")
@@ -59,8 +63,34 @@ func main() {
 	// TODO: Check the readiness of the exporter
 	time.Sleep(5 * time.Second)
 
+	// Disconnect from Turbo server when Kubeturbo is shutdown
+	handleExit(func() { tapService.DisconnectFromTurbo() })
+
 	// Connect to the Turbo server
 	tapService.ConnectToTurbo()
 
 	select {}
+}
+
+
+// handleExit disconnects the tap service from Turbo service when Kubeturbo is shotdown
+func handleExit(disconnectFunc disconnectFromTurboFunc) { //k8sTAPService *kubeturbo.K8sTAPService) {
+	glog.V(4).Infof("*** Handling Prometurbo Termination ***")
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan,
+		os.Interrupt,
+		syscall.SIGTERM,
+		syscall.SIGINT,
+		syscall.SIGQUIT,
+		syscall.SIGHUP)
+
+	go func() {
+		select {
+		case sig := <-sigChan:
+		// Close the mediation container including the endpoints. It avoids the
+		// invalid endpoints remaining in the server side. See OM-28801.
+			glog.V(2).Infof("Signal %s received. Disconnecting from Turbo server...\n", sig)
+			disconnectFunc()
+		}
+	}()
 }

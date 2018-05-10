@@ -7,12 +7,12 @@ import (
 	"github.com/turbonomic/turbo-go-sdk/pkg/service"
 	"github.com/turbonomic/prometurbo/pkg/conf"
 	"github.com/turbonomic/prometurbo/pkg/discovery"
-	"github.com/turbonomic/prometurbo/pkg/discovery/monitoring"
 	"github.com/turbonomic/prometurbo/pkg/registration"
 	"os"
 	"time"
 	"os/signal"
 	"syscall"
+	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
 )
 
 type disconnectFromTurboFunc func()
@@ -22,27 +22,25 @@ type P8sTAPService struct {}
 func (p *P8sTAPService) Start() {
 	glog.V(0).Infof("Starting prometheus TAP service...")
 
-	serviceConf := conf.DefaultConfPath
+	confPath := conf.DefaultConfPath
 
 	if os.Getenv("PROMETURBO_LOCAL_DEBUG") == "1" {
-		serviceConf = conf.LocalDebugConfPath
-		fmt.Printf("Using config file %s for local debugging", serviceConf)
+		confPath = conf.LocalDebugConfPath
+		glog.V(2).Infof("Using config file %s for local debugging", confPath)
 	}
 
-	conf, err := conf.NewPrometurboConf(serviceConf)
+	conf, err := conf.NewPrometurboConf(confPath)
 	if err != nil {
-		glog.Errorf("Error while parsing the turbo communicator config file %v: %v\n", serviceConf, err)
+		glog.Errorf("Error while parsing the service config file %s: %v", confPath, err)
 		os.Exit(1)
 	}
 
-	glog.V(2).Infof("conf: %++v\n", conf)
+	glog.V(3).Infof("Read service configuration from %s: %++v", confPath, conf)
 
 	communicator := conf.Communicator
 	targetAddr := conf.TargetConf.Address
 	scope := conf.TargetConf.Scope
-
-	//builder := monitoring.NewEntityBuilder(scope)
-	metricExporters := []monitoring.MetricExporter{monitoring.NewMetricExporter(conf.MetricExporterEndpoint)}
+	metricExporters := []exporter.MetricExporter{exporter.NewMetricExporter(conf.MetricExporterEndpoint)}
 
 	registrationClient := &registration.P8sRegistrationClient{}
 	discoveryClient := discovery.NewDiscoveryClient(targetAddr, scope, metricExporters)
@@ -52,10 +50,11 @@ func (p *P8sTAPService) Start() {
 		WithTurboProbe(probe.NewProbeBuilder(registration.TargetType, registration.ProbeCategory).
 			//WithDiscoveryOptions(probe.FullRediscoveryIntervalSecondsOption(60)).
 			RegisteredBy(registrationClient).
-			DiscoversTarget(targetAddr, discoveryClient)).Create()
+			DiscoversTarget(targetAddr, discoveryClient)).
+		Create()
 
 	if err != nil {
-		glog.Errorf("Error while building turbo tap service on target %v: %v\n", targetAddr, err)
+		glog.Errorf("Error while building turbo TAP service on target %v: %v", targetAddr, err)
 		os.Exit(1)
 	}
 

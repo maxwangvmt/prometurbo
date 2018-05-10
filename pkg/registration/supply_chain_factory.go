@@ -3,6 +3,7 @@ package registration
 import (
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 	"github.com/turbonomic/turbo-go-sdk/pkg/supplychain"
+	"k8s.io/autoscaler/cluster-autoscaler/expander/factory"
 )
 
 var (
@@ -23,8 +24,8 @@ var (
 
 type SupplyChainFactory struct{}
 
-func (factory *SupplyChainFactory) CreateSupplyChain() ([]*proto.TemplateDTO, error) {
-	appNode, err := factory.buildAppSupplyBuilder()
+func (f *SupplyChainFactory) CreateSupplyChain() ([]*proto.TemplateDTO, error) {
+	appNode, err := f.buildAppSupplyBuilder()
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func (factory *SupplyChainFactory) CreateSupplyChain() ([]*proto.TemplateDTO, er
 		Create()
 }
 
-func (factory *SupplyChainFactory) buildAppSupplyBuilder() (*proto.TemplateDTO, error) {
+func (f *SupplyChainFactory) buildAppSupplyBuilder() (*proto.TemplateDTO, error) {
 	builder := supplychain.NewSupplyChainNodeBuilder(proto.EntityDTO_APPLICATION).
 		Sells(transactionTemplateComm).
 		Sells(respTimeTemplateComm)

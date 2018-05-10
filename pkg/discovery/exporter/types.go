@@ -1,4 +1,4 @@
-package monitoring
+package exporter
 
 type EntityMetric struct {
 	UID     string             `json:"uid,omitempty"`

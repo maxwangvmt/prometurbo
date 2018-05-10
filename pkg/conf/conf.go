@@ -40,7 +40,6 @@ func NewPrometurboConf(serviceConfigFilePath string) (*PrometurboConf, error) {
 	return metaConfig, nil
 }
 
-// Get the config from file.
 func readConfig(path string) (*PrometurboConf, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {

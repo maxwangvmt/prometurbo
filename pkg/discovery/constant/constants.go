@@ -1,4 +1,4 @@
-package monitoring
+package constant
 
 import (
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
@@ -7,22 +7,14 @@ import (
 const (
 	//EntityType
 	ApplicationType        = int32(1)
-	VirtualApplicationType = int32(2)
-	VirtualMachineType     = int32(3)
 
 	//CommodityType
 	TPS     = "tps"
 	Latency = "latency"
 
-	//Labels
-	IP       = "ip"
-	Port     = "port"
-	Name     = "name"
-	Category = "category"
-
 	//MetricType
-	USED     = "used"
-	CAPACITY = "capacity"
+	Used = "used"
+	Capacity = "capacity"
 
 	//Capacity
 	TPSCap     = 20.0
@@ -32,9 +24,7 @@ const (
 	DefaultPropertyNamespace string = "DEFAULT"
 
 	// The attribute used for stitching with other probes (e.g., prometurbo) with app and vapp
-	stitchingAttr string = "IP"
-
-	AppPrefix = "app-"
+	StitchingAttr string = "IP"
 )
 
 var EntityTypeMap = map[int32]proto.EntityDTO_EntityType{

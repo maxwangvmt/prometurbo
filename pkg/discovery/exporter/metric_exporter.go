@@ -1,4 +1,4 @@
-package monitoring
+package exporter
 
 import (
 	"net/http"
@@ -16,20 +16,24 @@ type metricExporter struct {
 }
 
 func NewMetricExporter(endpoint string) *metricExporter {
-	return &metricExporter{endpoint}
+	return &metricExporter{
+		endpoint: endpoint,
+	}
 }
 
 func (m *metricExporter) Query() ([]*EntityMetric, error) {
-	ebytes := sendRequest(m.endpoint)
+	resp, err := sendRequest(m.endpoint)
+	if err != nil {
+		return nil, err
+	}
 
-	//2. unmarshal it
 	var mr MetricResponse
-	if err := json.Unmarshal(ebytes, &mr); err != nil {
-		glog.Errorf("Failed to un-marshal bytes: %v", string(ebytes))
+	if err := json.Unmarshal(resp, &mr); err != nil {
+		glog.Errorf("Failed to un-marshal bytes: %v", string(resp))
 		return nil, err
 	}
 	if mr.Status != 0 || len(mr.Data) < 1 {
-		glog.Errorf("Failed to un-marshal MetricResponse: %+v", string(ebytes))
+		glog.Errorf("Failed to un-marshal MetricResponse: %+v", string(resp))
 		return nil, nil
 	}
 
@@ -41,20 +45,21 @@ func (m *metricExporter) Query() ([]*EntityMetric, error) {
 	return mr.Data, nil
 }
 
-func sendRequest(endpoint string) []byte {
+func sendRequest(endpoint string) ([]byte, error) {
 	glog.V(2).Infof("Sending request to %s", endpoint)
 	resp, err := http.Get(endpoint)
 	if err != nil {
-		glog.Errorf("Error: %v", err)
-		return nil
+		glog.Errorf("Failed getting response from %s: %v", endpoint, err)
+		return nil, err
 	}
 
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		glog.Errorf("Error: %v", err)
-		return nil
+		glog.Errorf("Error reading the response %v: %v", resp, err)
+		return nil, err
 	}
-	glog.V(2).Infof("Received resposne: %s", string(body))
+	glog.V(4).Infof("Received resposne: %s", string(body))
 	return body
 }

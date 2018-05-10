@@ -5,18 +5,19 @@ import (
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"github.com/turbonomic/prometurbo/pkg/discovery/monitoring"
+	"github.com/turbonomic/prometurbo/pkg/discovery/dtofactory"
 	"github.com/turbonomic/prometurbo/pkg/registration"
+	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
 )
 
 // Implements the TurboDiscoveryClient interface
 type P8sDiscoveryClient struct {
 	targetAddr       string
 	scope string
-	metricExporters  []monitoring.MetricExporter
+	metricExporters  []exporter.MetricExporter
 }
 
-func NewDiscoveryClient(targetAddr, scope string, metricExporters []monitoring.MetricExporter) *P8sDiscoveryClient {
+func NewDiscoveryClient(targetAddr, scope string, metricExporters []exporter.MetricExporter) *P8sDiscoveryClient {
 	return &P8sDiscoveryClient{
 		targetAddr:       targetAddr,
 		scope: scope,
@@ -25,15 +26,22 @@ func NewDiscoveryClient(targetAddr, scope string, metricExporters []monitoring.M
 }
 
 // Get the Account Values to create VMTTarget in the turbo server corresponding to this client
-func (discClient *P8sDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
+func (d *P8sDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
 	targetId := registration.TargetIdField
 	targetIdVal := &proto.AccountValue{
 		Key:         &targetId,
-		StringValue: &discClient.targetAddr,
+		StringValue: &d.targetAddr,
+	}
+
+	scope := registration.Scope
+	scopeVal := &proto.AccountValue{
+		Key: &scope,
+		StringValue: &d.scope,
 	}
 
 	accountValues := []*proto.AccountValue{
 		targetIdVal,
+		scopeVal,
 	}
 
 	targetInfo := probe.NewTurboTargetInfoBuilder(registration.ProbeCategory, registration.TargetType,
@@ -43,10 +51,9 @@ func (discClient *P8sDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo 
 }
 
 // Validate the Target
-func (discClient *P8sDiscoveryClient) Validate(accountValues []*proto.AccountValue) (*proto.ValidationResponse, error) {
+func (d *P8sDiscoveryClient) Validate(accountValues []*proto.AccountValue) (*proto.ValidationResponse, error) {
 	// TODO: Add logic for validation
 	validationResponse := &proto.ValidationResponse{}
-
 	return validationResponse, nil
 }
 
@@ -113,7 +120,7 @@ func (d *P8sDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*pro
 	return discoveryResponse, nil
 }
 
-func (d *P8sDiscoveryClient) buildEntities(metricExporter monitoring.MetricExporter) ([]*proto.EntityDTO, error) {
+func (d *P8sDiscoveryClient) buildEntities(metricExporter exporter.MetricExporter) ([]*proto.EntityDTO, error) {
 	var entities []*proto.EntityDTO
 
 	metrics, err := metricExporter.Query()
@@ -123,7 +130,7 @@ func (d *P8sDiscoveryClient) buildEntities(metricExporter monitoring.MetricExpor
 	}
 
 	for _, metric := range metrics {
-		dtos, err := monitoring.NewEntityBuilder(d.scope, metric).Build()
+		dtos, err := dtofactory.NewEntityBuilder(d.scope, metric).Build()
 		if err != nil {
 			glog.Errorf("Error building entity from metric %v: %s", metric, err)
 			continue

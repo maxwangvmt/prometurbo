@@ -1,23 +1,22 @@
 package pkg
 
 import (
-	"fmt"
 	"github.com/golang/glog"
-	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
-	"github.com/turbonomic/turbo-go-sdk/pkg/service"
 	"github.com/turbonomic/prometurbo/pkg/conf"
 	"github.com/turbonomic/prometurbo/pkg/discovery"
+	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
 	"github.com/turbonomic/prometurbo/pkg/registration"
+	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
+	"github.com/turbonomic/turbo-go-sdk/pkg/service"
 	"os"
-	"time"
 	"os/signal"
 	"syscall"
-	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
+	"time"
 )
 
 type disconnectFromTurboFunc func()
 
-type P8sTAPService struct {}
+type P8sTAPService struct{}
 
 func (p *P8sTAPService) Start() {
 	glog.V(0).Infof("Starting prometheus TAP service...")
@@ -71,7 +70,6 @@ func (p *P8sTAPService) Start() {
 	select {}
 }
 
-
 // TODO: Move the handle to turbo-sdk-probe as it should be common logic for similar probes
 // handleExit disconnects the tap service from Turbo service when prometurbo is terminated
 func handleExit(disconnectFunc disconnectFromTurboFunc) {
@@ -87,8 +85,8 @@ func handleExit(disconnectFunc disconnectFromTurboFunc) {
 	go func() {
 		select {
 		case sig := <-sigChan:
-		// Close the mediation container including the endpoints. It avoids the
-		// invalid endpoints remaining in the server side. See OM-28801.
+			// Close the mediation container including the endpoints. It avoids the
+			// invalid endpoints remaining in the server side. See OM-28801.
 			glog.V(2).Infof("Signal %s received. Disconnecting from Turbo server...\n", sig)
 			disconnectFunc()
 		}

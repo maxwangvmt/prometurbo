@@ -3,10 +3,10 @@ package dtofactory
 import (
 	"fmt"
 	"github.com/golang/glog"
+	"github.com/turbonomic/prometurbo/pkg/discovery/constant"
+	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
 	"github.com/turbonomic/turbo-go-sdk/pkg/builder"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
-	"github.com/turbonomic/prometurbo/pkg/discovery/constant"
 )
 
 type entityBuilder struct {
@@ -18,7 +18,7 @@ type entityBuilder struct {
 
 func NewEntityBuilder(scope string, metric *exporter.EntityMetric) *entityBuilder {
 	return &entityBuilder{
-		scope: scope,
+		scope:  scope,
 		metric: metric,
 	}
 }
@@ -36,7 +36,7 @@ func (b *entityBuilder) Build() ([]*proto.EntityDTO, error) {
 	ip := metric.UID
 
 	commodities := []*proto.CommodityDTO{}
-	commTypes :=  []proto.CommodityDTO_CommodityType{}
+	commTypes := []proto.CommodityDTO_CommodityType{}
 	commMetrics := metric.Metrics
 	for key, value := range commMetrics {
 		var commType proto.CommodityDTO_CommodityType
@@ -62,7 +62,7 @@ func (b *entityBuilder) Build() ([]*proto.EntityDTO, error) {
 
 		// Adjust the capacity in case utilization > 1
 		if value >= capacity {
-			capacity = value// + 1
+			capacity = value // + 1
 		}
 
 		commodity, err := builder.NewCommodityDTOBuilder(commType).
@@ -80,11 +80,11 @@ func (b *entityBuilder) Build() ([]*proto.EntityDTO, error) {
 	id := b.getEntityId(entityType, ip)
 
 	dto, err := builder.NewEntityDTOBuilder(entityType, id).
-				DisplayName(id).
-				SellsCommodities(commodities).
-				WithProperty(getEntityProperty(ip)).
-				ReplacedBy(getReplacementMetaData(entityType, commTypes)).
-				Create()
+		DisplayName(id).
+		SellsCommodities(commodities).
+		WithProperty(getEntityProperty(ip)).
+		ReplacedBy(getReplacementMetaData(entityType, commTypes)).
+		Create()
 
 	if err != nil {
 		glog.Errorf("Error building EntityDTO from metric %v: %s", metric, err)
@@ -107,12 +107,12 @@ func getReplacementMetaData(entityType proto.EntityDTO_EntityType, commTypes []p
 	useTopoExt := true
 
 	b := builder.NewReplacementEntityMetaDataBuilder().
-			Matching(attr).
-			MatchingExternal(&proto.ServerEntityPropDef{
-						Entity:     &entityType,
-						Attribute:  &attr,
-						UseTopoExt: &useTopoExt,
-					})
+		Matching(attr).
+		MatchingExternal(&proto.ServerEntityPropDef{
+			Entity:     &entityType,
+			Attribute:  &attr,
+			UseTopoExt: &useTopoExt,
+		})
 
 	for _, commType := range commTypes {
 		b.PatchSellingWithProperty(commType, []string{constant.Used, constant.Capacity})

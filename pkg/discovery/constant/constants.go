@@ -5,20 +5,20 @@ import (
 )
 
 const (
-	//EntityType
-	ApplicationType        = int32(1)
+	// EntityType
+	ApplicationType = int32(1)
 
-	//CommodityType
+	// CommodityType
 	TPS     = "tps"
 	Latency = "latency"
 
-	//MetricType
-	Used = "used"
+	// MetricType
+	Used     = "used"
 	Capacity = "capacity"
 
-	//Capacity
+	// Capacity
 	TPSCap     = 20.0
-	LatencyCap = 500.0 //ms
+	LatencyCap = 500.0 //millisec
 
 	// The default namespace of entity property
 	DefaultPropertyNamespace string = "DEFAULT"
@@ -37,6 +37,6 @@ var CommodityTypeMap = map[string]proto.CommodityDTO_CommodityType{
 }
 
 var CommodityCapMap = map[proto.CommodityDTO_CommodityType]float64{
-	proto.CommodityDTO_TRANSACTION:     TPSCap,
+	proto.CommodityDTO_TRANSACTION:   TPSCap,
 	proto.CommodityDTO_RESPONSE_TIME: LatencyCap,
 }

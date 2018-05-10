@@ -10,7 +10,7 @@ const (
 	TargetIdField string = "targetIdentifier"
 	ProbeCategory string = "Cloud Native"
 	TargetType    string = "Prometheus"
-	Scope    string = "Scope"
+	Scope         string = "Scope"
 )
 
 // Implements the TurboRegistrationClient interface

@@ -16,7 +16,7 @@ func main() {
 	flag.Set("log_dir", "/var/log")
 	defer glog.Flush()
 
-	glog.V(0).Infof("Starting prometurbo...",)
+	glog.Info("Starting prometurbo...")
 
 	s := pkg.P8sTAPService{}
 	s.Start()

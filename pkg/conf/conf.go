@@ -2,6 +2,7 @@ package conf
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/golang/glog"
 	"github.com/turbonomic/turbo-go-sdk/pkg/service"
 	"io/ioutil"
@@ -24,20 +25,28 @@ type PrometurboTargetConf struct {
 	Scope   string `json:"scope,omitempty"`
 }
 
-func NewPrometurboConf(serviceConfigFilePath string) (*PrometurboConf, error) {
+func NewPrometurboConf(configFilePath string) (*PrometurboConf, error) {
 
-	glog.Infof("Read configuration from %s", serviceConfigFilePath)
-	metaConfig, err := readConfig(serviceConfigFilePath)
+	glog.Infof("Read configuration from %s", configFilePath)
+	config, err := readConfig(configFilePath)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if metaConfig.MetricExporterEndpoint == "" {
-		metaConfig.MetricExporterEndpoint = defaultEndpoint
+	if config.MetricExporterEndpoint == "" {
+		config.MetricExporterEndpoint = defaultEndpoint
 	}
 
-	return metaConfig, nil
+	if config.Communicator == nil {
+		return nil, fmt.Errorf("Unable to read the turbo communication config from %s", configFilePath)
+	}
+
+	if config.TargetConf == nil {
+		return nil, fmt.Errorf("Unable to read the target config from %s", configFilePath)
+	}
+
+	return config, nil
 }
 
 func readConfig(path string) (*PrometurboConf, error) {

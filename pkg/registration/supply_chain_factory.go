@@ -3,7 +3,6 @@ package registration
 import (
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
 	"github.com/turbonomic/turbo-go-sdk/pkg/supplychain"
-	"k8s.io/autoscaler/cluster-autoscaler/expander/factory"
 )
 
 var (

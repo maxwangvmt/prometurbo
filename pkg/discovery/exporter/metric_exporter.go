@@ -1,10 +1,10 @@
 package exporter
 
 import (
-	"net/http"
 	"encoding/json"
 	"github.com/golang/glog"
 	"io/ioutil"
+	"net/http"
 )
 
 type MetricExporter interface {
@@ -61,5 +61,5 @@ func sendRequest(endpoint string) ([]byte, error) {
 		return nil, err
 	}
 	glog.V(4).Infof("Received resposne: %s", string(body))
-	return body
+	return body, nil
 }

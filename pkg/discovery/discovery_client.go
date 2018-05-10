@@ -3,25 +3,25 @@ package discovery
 import (
 	"fmt"
 	"github.com/golang/glog"
+	"github.com/turbonomic/prometurbo/pkg/discovery/dtofactory"
+	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
+	"github.com/turbonomic/prometurbo/pkg/registration"
 	"github.com/turbonomic/turbo-go-sdk/pkg/probe"
 	"github.com/turbonomic/turbo-go-sdk/pkg/proto"
-	"github.com/turbonomic/prometurbo/pkg/discovery/dtofactory"
-	"github.com/turbonomic/prometurbo/pkg/registration"
-	"github.com/turbonomic/prometurbo/pkg/discovery/exporter"
 )
 
 // Implements the TurboDiscoveryClient interface
 type P8sDiscoveryClient struct {
-	targetAddr       string
-	scope string
-	metricExporters  []exporter.MetricExporter
+	targetAddr      string
+	scope           string
+	metricExporters []exporter.MetricExporter
 }
 
 func NewDiscoveryClient(targetAddr, scope string, metricExporters []exporter.MetricExporter) *P8sDiscoveryClient {
 	return &P8sDiscoveryClient{
-		targetAddr:       targetAddr,
-		scope: scope,
-		metricExporters:  metricExporters,
+		targetAddr:      targetAddr,
+		scope:           scope,
+		metricExporters: metricExporters,
 	}
 }
 
@@ -35,7 +35,7 @@ func (d *P8sDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
 
 	scope := registration.Scope
 	scopeVal := &proto.AccountValue{
-		Key: &scope,
+		Key:         &scope,
 		StringValue: &d.scope,
 	}
 
@@ -73,38 +73,6 @@ func (d *P8sDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*pro
 		entities = append(entities, dtos...)
 
 		glog.V(4).Infof("Entities built from exporter %v: %v", metricExporter, dtos)
-
-		//metrics, err := metricExporter.Query()
-		//if err != nil {
-		//	glog.Errorf("Error while querying metrics exporter: %s", err)
-		//	// If there is error during discovery, return an ErrorDTO.
-		//	severity := proto.ErrorDTO_CRITICAL
-		//	description := fmt.Sprintf("%v", err)
-		//	errorDTO := &proto.ErrorDTO{
-		//		Severity:    &severity,
-		//		Description: &description,
-		//	}
-		//	discoveryResponse := &proto.DiscoveryResponse{
-		//		ErrorDTO: []*proto.ErrorDTO{errorDTO},
-		//	}
-		//	return discoveryResponse, nil
-		//}
-		//
-		//for _, metric := range metrics {
-		//	//if metric.Type != proto.EntityDTO_APPLICATION {
-		//	//	glog.Errorf("Only Application type is supported %v: %s", metric.Type)
-		//	//	continue
-		//	//}
-		//	dtos, err := d.entityBuilder.Build(metric)
-		//	if err != nil {
-		//		glog.Errorf("Error building entity from metric %v: %s", metric, err)
-		//		continue
-		//	}
-		//	entities = append(entities, dtos...)
-		//	//if len(dtos) > 0 {
-		//	//	glog.V(4).Infof("Discovered DTO: %++v", dtos[0])
-		//	//}
-		//}
 	}
 
 	// The discovery fails if all queries to exporters fail
@@ -115,7 +83,6 @@ func (d *P8sDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*pro
 	discoveryResponse := &proto.DiscoveryResponse{
 		EntityDTO: entities,
 	}
-	//glog.V(4).Infof("Discovery response %v", discoveryResponse)
 
 	return discoveryResponse, nil
 }

@@ -9,24 +9,23 @@ import (
 	"github.com/turbonomic/prometurbo/pkg/registration"
 )
 
-// Discovery Client for the Prometheus Probe
 // Implements the TurboDiscoveryClient interface
-type PrometheusDiscoveryClient struct {
+type P8sDiscoveryClient struct {
 	targetAddr       string
-	metricExporters  []monitoring.IMetricExporter
-	appEntityBuilder monitoring.IEntityBuilder
+	scope string
+	metricExporters  []monitoring.MetricExporter
 }
 
-func NewDiscoveryClient(targetAddr string, appEntityBuilder monitoring.IEntityBuilder, metricExporters []monitoring.IMetricExporter) *PrometheusDiscoveryClient {
-	return &PrometheusDiscoveryClient{
+func NewDiscoveryClient(targetAddr, scope string, metricExporters []monitoring.MetricExporter) *P8sDiscoveryClient {
+	return &P8sDiscoveryClient{
 		targetAddr:       targetAddr,
+		scope: scope,
 		metricExporters:  metricExporters,
-		appEntityBuilder: appEntityBuilder,
 	}
 }
 
 // Get the Account Values to create VMTTarget in the turbo server corresponding to this client
-func (discClient *PrometheusDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
+func (discClient *P8sDiscoveryClient) GetAccountValues() *probe.TurboTargetInfo {
 	targetId := registration.TargetIdField
 	targetIdVal := &proto.AccountValue{
 		Key:         &targetId,
@@ -44,58 +43,108 @@ func (discClient *PrometheusDiscoveryClient) GetAccountValues() *probe.TurboTarg
 }
 
 // Validate the Target
-func (discClient *PrometheusDiscoveryClient) Validate(accountValues []*proto.AccountValue) (*proto.ValidationResponse, error) {
-	glog.V(2).Infof("BEGIN Validation for PrometheusDiscoveryClient %s\n", accountValues)
-
+func (discClient *P8sDiscoveryClient) Validate(accountValues []*proto.AccountValue) (*proto.ValidationResponse, error) {
+	// TODO: Add logic for validation
 	validationResponse := &proto.ValidationResponse{}
 
-	glog.V(2).Infof("Validation response %s\n", validationResponse)
 	return validationResponse, nil
 }
 
 // Discover the Target Topology
-func (d *PrometheusDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*proto.DiscoveryResponse, error) {
-	glog.V(2).Infof("========= Discovering Prometheus ============= %s\n", accountValues)
+func (d *P8sDiscoveryClient) Discover(accountValues []*proto.AccountValue) (*proto.DiscoveryResponse, error) {
+	glog.V(2).Infof("Discovering the target %s", accountValues)
 	var entities []*proto.EntityDTO
+	allExportersFailed := true
 
 	for _, metricExporter := range d.metricExporters {
-		metrics, err := metricExporter.Query()
+		dtos, err := d.buildEntities(metricExporter)
 		if err != nil {
-			glog.Errorf("Error while querying metrics exporter: %s\n", err)
-			// If there is error during discovery, return an ErrorDTO.
-			severity := proto.ErrorDTO_CRITICAL
-			description := fmt.Sprintf("%v", err)
-			errorDTO := &proto.ErrorDTO{
-				Severity:    &severity,
-				Description: &description,
-			}
-			discoveryResponse := &proto.DiscoveryResponse{
-				ErrorDTO: []*proto.ErrorDTO{errorDTO},
-			}
-			return discoveryResponse, nil
+			glog.Errorf("Error while querying metrics exporter %v: %v", metricExporter, err)
+			continue
 		}
+		allExportersFailed = false
+		entities = append(entities, dtos...)
 
-		for _, metric := range metrics {
-			//if metric.Type != proto.EntityDTO_APPLICATION {
-			//	glog.Errorf("Only Application type is supported %v: %s", metric.Type)
-			//	continue
-			//}
-			dtos, err := d.appEntityBuilder.Build(metric)
-			if err != nil {
-				glog.Errorf("Error building entity from metric %v: %s", metric, err)
-				continue
-			}
-			entities = append(entities, dtos...)
-			if len(dtos) > 0 {
-				glog.V(4).Infof("Discovered DTO: %++v\n", dtos[0])
-			}
-		}
+		glog.V(4).Infof("Entities built from exporter %v: %v", metricExporter, dtos)
+
+		//metrics, err := metricExporter.Query()
+		//if err != nil {
+		//	glog.Errorf("Error while querying metrics exporter: %s", err)
+		//	// If there is error during discovery, return an ErrorDTO.
+		//	severity := proto.ErrorDTO_CRITICAL
+		//	description := fmt.Sprintf("%v", err)
+		//	errorDTO := &proto.ErrorDTO{
+		//		Severity:    &severity,
+		//		Description: &description,
+		//	}
+		//	discoveryResponse := &proto.DiscoveryResponse{
+		//		ErrorDTO: []*proto.ErrorDTO{errorDTO},
+		//	}
+		//	return discoveryResponse, nil
+		//}
+		//
+		//for _, metric := range metrics {
+		//	//if metric.Type != proto.EntityDTO_APPLICATION {
+		//	//	glog.Errorf("Only Application type is supported %v: %s", metric.Type)
+		//	//	continue
+		//	//}
+		//	dtos, err := d.entityBuilder.Build(metric)
+		//	if err != nil {
+		//		glog.Errorf("Error building entity from metric %v: %s", metric, err)
+		//		continue
+		//	}
+		//	entities = append(entities, dtos...)
+		//	//if len(dtos) > 0 {
+		//	//	glog.V(4).Infof("Discovered DTO: %++v", dtos[0])
+		//	//}
+		//}
+	}
+
+	// The discovery fails if all queries to exporters fail
+	if allExportersFailed {
+		return d.failDiscovery(), nil
 	}
 
 	discoveryResponse := &proto.DiscoveryResponse{
 		EntityDTO: entities,
 	}
-	glog.V(3).Infof("Prometheus discovery response %s\n", discoveryResponse)
+	//glog.V(4).Infof("Discovery response %v", discoveryResponse)
 
 	return discoveryResponse, nil
+}
+
+func (d *P8sDiscoveryClient) buildEntities(metricExporter monitoring.MetricExporter) ([]*proto.EntityDTO, error) {
+	var entities []*proto.EntityDTO
+
+	metrics, err := metricExporter.Query()
+	if err != nil {
+		glog.Errorf("Error while querying metrics exporter: %v", err)
+		return nil, err
+	}
+
+	for _, metric := range metrics {
+		dtos, err := monitoring.NewEntityBuilder(d.scope, metric).Build()
+		if err != nil {
+			glog.Errorf("Error building entity from metric %v: %s", metric, err)
+			continue
+		}
+		entities = append(entities, dtos...)
+	}
+
+	return entities, nil
+}
+
+func (d *P8sDiscoveryClient) failDiscovery() *proto.DiscoveryResponse {
+	description := fmt.Sprintf("All exporter queries failed: %v", d.metricExporters)
+	glog.Errorf(description)
+	// If there is error during discovery, return an ErrorDTO.
+	severity := proto.ErrorDTO_CRITICAL
+	errorDTO := &proto.ErrorDTO{
+		Severity:    &severity,
+		Description: &description,
+	}
+	discoveryResponse := &proto.DiscoveryResponse{
+		ErrorDTO: []*proto.ErrorDTO{errorDTO},
+	}
+	return discoveryResponse
 }

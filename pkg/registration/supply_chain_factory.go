@@ -8,7 +8,7 @@ import (
 var (
 	respTimeType    = proto.CommodityDTO_RESPONSE_TIME
 	transactionType = proto.CommodityDTO_TRANSACTION
-	key             = "key-1"
+	key             = "key-placeholder"
 
 	respTimeTemplateComm *proto.TemplateCommodity = &proto.TemplateCommodity{
 		CommodityType: &respTimeType,
@@ -24,7 +24,6 @@ var (
 type SupplyChainFactory struct{}
 
 func (factory *SupplyChainFactory) CreateSupplyChain() ([]*proto.TemplateDTO, error) {
-
 	appNode, err := factory.buildAppSupplyBuilder()
 	if err != nil {
 		return nil, err

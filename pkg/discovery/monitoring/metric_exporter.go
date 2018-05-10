@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 )
 
-type IMetricExporter interface {
+type MetricExporter interface {
 	Query() ([]*EntityMetric, error)
 }
 

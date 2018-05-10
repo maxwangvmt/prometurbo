@@ -6,12 +6,12 @@
         },
         "restAPIConfig": {
             "opsManagerUserName": "administrator",
-            "opsManagerPassword": "a"
+            "opsManagerPassword": "administrator"
         }
     },
-    "targetConfig": {
-        "targetAddress":"prom-target-1",
+    "prometurboTargetConfig": {
+        "targetAddress":"http://prometheus.istio-system:9090",
         "scope":"k8s-cluster-1"
     },
-    "metricExporterEndpoint": "http://192.168.99.100:8081/fake/metrics"
+    "metricExporterEndpoint": "http://192.168.99.100:8081/pod/metrics"
 }

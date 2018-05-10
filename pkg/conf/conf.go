@@ -8,26 +8,26 @@ import (
 )
 
 const (
-	LocalDebugConfPath = "configs/conf.json"
+	LocalDebugConfPath = "configs/prometurbo-config"
 	DefaultConfPath    = "/etc/prometurbo/turbo.config"
 	defaultEndpoint    = "http://localhost:8081/pod/metrics"
 )
 
-type PrometheusConf struct {
+type PrometurboConf struct {
 	Communicator           *service.TurboCommunicationConfig `json:"communicationConfig,omitempty"`
-	TargetConf             *PrometheusTargetConf             `json:"targetConfig,omitempty"`
+	TargetConf             *PrometurboTargetConf             `json:"prometurboTargetConfig,omitempty"`
 	MetricExporterEndpoint string                            `json:"metricExporterEndpoint,omitempty"`
 }
 
-type PrometheusTargetConf struct {
+type PrometurboTargetConf struct {
 	Address string `json:"targetAddress,omitempty"`
 	Scope   string `json:"scope,omitempty"`
 }
 
-func NewPrometheusConf(targetConfigFilePath string) (*PrometheusConf, error) {
+func NewPrometurboConf(serviceConfigFilePath string) (*PrometurboConf, error) {
 
-	glog.Infof("Read configuration from %s\n", targetConfigFilePath)
-	metaConfig, err := readConfig(targetConfigFilePath)
+	glog.Infof("Read configuration from %s", serviceConfigFilePath)
+	metaConfig, err := readConfig(serviceConfigFilePath)
 
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func NewPrometheusConf(targetConfigFilePath string) (*PrometheusConf, error) {
 }
 
 // Get the config from file.
-func readConfig(path string) (*PrometheusConf, error) {
+func readConfig(path string) (*PrometurboConf, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		glog.Errorf("File error: %v\n", err)
@@ -49,7 +49,7 @@ func readConfig(path string) (*PrometheusConf, error) {
 	}
 	glog.Infoln(string(file))
 
-	var config PrometheusConf
+	var config PrometurboConf
 	err = json.Unmarshal(file, &config)
 
 	if err != nil {

@@ -10,37 +10,40 @@ const (
 	TargetIdField string = "targetIdentifier"
 	ProbeCategory string = "Cloud Native"
 	TargetType    string = "Prometheus"
+	Scope    string = "Scope"
 )
 
-// Registration Client for the Prometheus probe
 // Implements the TurboRegistrationClient interface
-type PrometheusRegistrationClient struct {
+type P8sRegistrationClient struct {
 }
 
-func (myProbe *PrometheusRegistrationClient) GetSupplyChainDefinition() []*proto.TemplateDTO {
+func (p *P8sRegistrationClient) GetSupplyChainDefinition() []*proto.TemplateDTO {
 	glog.Infoln("Building a supply chain ..........")
 
-	// 2. Build supply chain.
 	supplyChainFactory := &SupplyChainFactory{}
 	templateDtos, err := supplyChainFactory.CreateSupplyChain()
 	if err != nil {
-		glog.Infoln("Error creating Supply chain for the Prometheus probe")
+		glog.Error("Error creating Supply chain for Prometurbo")
 		return nil
 	}
-	glog.Infoln("Supply chain for the Prometheus probe is created.")
+	glog.Infoln("Supply chain for Prometurbo is created.")
 	return templateDtos
 }
 
-func (registrationClient *PrometheusRegistrationClient) GetIdentifyingFields() string {
+func (p *P8sRegistrationClient) GetIdentifyingFields() string {
 	return TargetIdField
 }
 
-func (myProbe *PrometheusRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry {
+func (p *P8sRegistrationClient) GetAccountDefinition() []*proto.AccountDefEntry {
 
 	targetIDAcctDefEntry := builder.NewAccountDefEntryBuilder(TargetIdField, "URL",
 		"URL of the Prometheus target", ".*", true, false).Create()
 
+	scopeAcctDefEntry := builder.NewAccountDefEntryBuilder(Scope, Scope,
+		"The associated target name (e.g., Kubernetes target)", ".*", false, false).Create()
+
 	return []*proto.AccountDefEntry{
 		targetIDAcctDefEntry,
+		scopeAcctDefEntry,
 	}
 }
